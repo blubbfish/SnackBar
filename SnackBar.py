@@ -1,5 +1,6 @@
 # coding: utf-8
 import csv
+# from Inpayment import Inpayment
 import math
 import os
 import threading
@@ -16,11 +17,9 @@ from flask_admin import Admin, expose, helpers, AdminIndexView, BaseView
 from flask_admin.base import MenuLink
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.form.upload import FileUploadField
-from flask_sqlalchemy import SQLAlchemy
 from jinja2 import Markup
+
 from sqlalchemy import *
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import SingletonThreadPool
 from sqlalchemy.sql import func
 # noinspection PyPackageRequirements
 from werkzeug.utils import secure_filename
@@ -33,24 +32,9 @@ from sendEmail import Bimail
 import urllib, hashlib
 import optparse
 
-databaseName = 'CoffeeDB.db'
-url = 'sqlite:///' + databaseName
-engine = create_engine(url, connect_args={'check_same_thread': False}, poolclass=SingletonThreadPool)
-Session = sessionmaker(bind=engine)
-session = Session()
-
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = url
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
-app.config['SECRET_KEY'] = '123456790'
-app.config['STATIC_FOLDER'] = 'static'
-app.config['IMAGE_FOLDER'] = 'static/images'
-app.config['ICON_FOLDER'] = 'static/icons'
-app.config['DEBUG'] = False
-app.config['SESSION_COOKIE_PATH'] = '/'
-
-db = SQLAlchemy(app)
-
+from Snackbar.Models import *
+from Snackbar.Admin import admin
+from Snackbar import session, app, db, databaseName, database_exist
 if not os.path.exists(app.config['IMAGE_FOLDER']):
     os.makedirs(app.config['IMAGE_FOLDER'])
 
@@ -89,160 +73,6 @@ def itemstrikes(value):
     return Markup(out)
 
 
-class History(db.Model):
-    historyid = db.Column(db.Integer, primary_key=True, autoincrement=True)
-
-    userid = db.Column(db.Integer, db.ForeignKey('user.userid'))
-    user = db.relationship('User', backref=db.backref('history', lazy='dynamic'))
-    # user = db.relationship('User', foreign_keys=userid)
-
-    itemid = db.Column(db.Integer, db.ForeignKey('item.itemid'))
-    item = db.relationship('Item', backref=db.backref('items', lazy='dynamic'))
-    # item = db.relationship('Item', foreign_keys=itemid)
-
-    price = db.Column(db.Float)
-    date = db.Column(db.DateTime)
-
-    def __init__(self, user=None, item=None, price=0, date=None):
-        self.user = user
-        self.item = item
-        self.price = price
-
-        if date is None:
-            date = datetime.now()
-        self.date = date
-
-    def __repr__(self):
-        return 'User {} bought {} for {} on the {}'.format(self.user, self.item, self.price, self.date)
-
-
-class Inpayment(db.Model):
-    paymentid = db.Column(db.Integer, primary_key=True, autoincrement=True)
-
-    userid = db.Column(db.Integer, db.ForeignKey('user.userid'))
-    user = db.relationship('User', backref=db.backref('inpayment', lazy='dynamic'))
-    # user = db.relationship('User', foreign_keys=userid)
-
-    amount = db.Column(db.Float)
-    date = db.Column(db.DateTime)
-    notes = db.Column(db.String(120))
-
-    def __init__(self, user=None, amount=None, date=None, notes=None):
-        self.userid = user
-        self.amount = amount
-        self.notes = notes
-
-        if date is None:
-            date = datetime.now()
-        self.date = date
-
-    def __repr__(self):
-        return 'User {} paid {} on the {}'.format(self.userid, self.amount, self.date)
-
-
-class User(db.Model):
-    userid = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    firstName = db.Column(db.String(80), nullable=False, default='')
-    lastName = db.Column(db.String(80), nullable=False, default='')
-    imageName = db.Column(db.String(240))
-    email = db.Column(db.String(120), nullable=False, default='')
-    hidden = db.Column(db.Boolean)
-
-    def __init__(self, firstname='', lastname='', email='', imagename=''):
-        if not firstname:
-            firstname = ''
-        if not lastname:
-            lastname = ''
-        if not imagename:
-            imagename = ''
-        if not email:
-            email = 'example@example.org'
-
-        self.hidden = False
-        self.firstName = firstname
-        self.lastName = lastname
-        self.imageName = imagename
-        self.email = email
-
-    def __repr__(self):
-        return u'{} {}'.format(self.firstName, self.lastName)
-
-
-class Item(db.Model):
-    itemid = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(80), unique=True, nullable=False, default='')
-    price = db.Column(db.Float)
-    icon = db.Column(db.String(300))
-
-    def __init__(self, name='', price=0):
-        self.name = name
-        self.price = price
-
-    def __repr__(self):
-        return self.name
-
-
-class Coffeeadmin(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), unique=True, nullable=False, default='')
-    password = db.Column(db.String(64))
-
-    # Flask-Login integration
-    @staticmethod
-    def is_authenticated():
-        return True
-
-    @staticmethod
-    def is_active():
-        return True
-
-    @staticmethod
-    def is_anonymous():
-        return False
-
-    def get_id(self):
-        return self.id
-
-
-class Settings(db.Model):
-    settingsid = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    key = db.Column(db.String(80), unique=True)
-    value = db.Column(db.String(600))
-
-    def __init__(self, key='', value=''):
-        if not key:
-            key = ''
-        if not value:
-            value = ''
-
-        self.key = key
-        self.value = value
-
-    def __repr__(self):
-        return self.key
-
-
-class LoginForm(form.Form):
-    login = fields.StringField(validators=[validators.required()])
-    password = fields.PasswordField(validators=[validators.required()])
-
-    # noinspection PyUnusedLocal
-    def validate_login(self, field):
-        user = self.get_user()
-
-        if user is None:
-            raise validators.ValidationError('Invalid User')
-
-        # we're comparing the plaintext pw with the the hash from the db
-        if user.password != self.password.data:
-            # to compare plain text passwords use
-            # if User.password != self.password.data:
-            raise validators.ValidationError('Invalid password')
-
-    def get_user(self):
-        return db.session.query(Coffeeadmin).filter_by(name=self.login.data).first()
-
-
 # noinspection PyUnusedLocal
 class RegistrationForm(form.Form):
     login = fields.StringField(validators=[validators.required()])
@@ -269,7 +99,10 @@ def getcurrbill(userid):
         filter(History.userid == userid).scalar()
     if curr_bill_new is None:
         curr_bill_new = 0
-
+    user_start = db.session.query(User.startmoney).filter(User.userid == userid).scalar()
+    if user_start is None:
+        user_start = 0
+    curr_bill_new =  curr_bill_new + user_start
     # bill = History.query.filter(History.userid == userid).filter(History.paid == False)
     # currbill = 0
 
@@ -466,261 +299,20 @@ def button_font_color(user):
         return '#%02x%02x%02x' % (255, 255, 255)
 
 
-class AnalyticsView(BaseView):
-
-    @expose('/')
-    def index(self):
-
-        initusers = list()
-
-        for instance in User.query.filter(User.hidden.is_(False)):
-            initusers.append({'name': u'{} {}'.format(instance.firstName, instance.lastName),
-                              'userid': '{}'.format(instance.userid),
-                              'bill': rest_bill(instance.userid)})
-
-        users = sorted(initusers, key=lambda k: k['name'])
-
-        return self.render('admin/test.html', users=users)
-
-    @expose('/reminder/')
-    def reminder(self):
-        for aUser in User.query.filter(User.hidden.is_(False)):
-            send_reminder(aUser)
-        return redirect(url_for('admin.index'))
-
-    @expose('/export/')
-    def export(self):
-        filename = 'CoffeeBill_{}_{}.xls'.format(datetime.now().date().isoformat(),
-                                                 datetime.now().time().strftime('%H-%M-%S'))
-
-        fullpath = os.path.join(current_app.root_path, app.config['STATIC_FOLDER'])
-        make_xls_bill(filename, fullpath)
-
-        return send_from_directory(directory=fullpath, filename=filename, as_attachment=True)
-
-    def is_accessible(self):
-        return loginflask.current_user.is_authenticated
 
 
-class MyPaymentModelView(ModelView):
-    can_create = True
-    can_delete = False
-    can_edit = True
-    can_export = True
-    form_excluded_columns = 'date'
-    export_types = ['csv']
-    column_default_sort = ('date', True)
-    column_filters = ('user', 'amount', 'date')
-    list_template = 'admin/custom_list.html'
-
-    # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def date_format(self, context, model, name):
-        field = getattr(model, name)
-        return field.strftime('%Y-%m-%d %H:%M')
-
-    column_formatters = dict(date=date_format)
-
-    def is_accessible(self):
-        return loginflask.current_user.is_authenticated
-
-    def page_sum(self, current_page):
-        # this should take into account any filters/search inplace
-        _query = self.session.query(Inpayment).limit(self.page_size).offset(current_page * self.page_size)
-        page_sum = sum([payment.amount for payment in _query])
-        if page_sum is None:
-            page_sum = 0
-        return '{0:.2f}'.format(page_sum)
-
-    def total_sum(self):
-        # this should take into account any filters/search inplace
-        total_sum = self.session.query(func.sum(Inpayment.amount)).scalar()
-        if total_sum is None:
-            total_sum = 0
-        return '{0:.2f}'.format(total_sum)
-
-    def render(self, template, **kwargs):
-        # we are only interested in the list page
-        if template == 'admin/custom_list.html':
-            # append a summary_data dictionary into kwargs
-            _current_page = kwargs['page']
-            kwargs['summary_data'] = [
-                {'title': 'Page Total', 'amount': self.page_sum(_current_page)},
-                {'title': 'Grand Total', 'amount': self.total_sum()},
-            ]
-            kwargs['summary_title'] = [{'title': ''}, {'title': 'Amount'}, ]
-        return super(MyPaymentModelView, self).render(template, **kwargs)
 
 
-class MyHistoryModelView(ModelView):
-    can_create = True
-    can_export = True
-    can_delete = True
-    can_edit = True
-    export_types = ['csv']
-    column_descriptions = dict()
-    column_labels = dict(user='Name')
-    column_default_sort = ('date', True)
-    column_filters = ('user', 'item', 'date')
-    form_args = dict(date=dict(default=datetime.now()), price=dict(default=0))
-
-    # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def date_format(self, context, model, name):
-        field = getattr(model, name)
-        if field is not None:
-            return field.strftime('%Y-%m-%d %H:%M')
-        else:
-            return ""
-
-    column_formatters = dict(date=date_format)
-
-    def is_accessible(self):
-        return loginflask.current_user.is_authenticated
 
 
-class MyUserModelView(ModelView):
-    can_export = True
-    export_types = ['csv']
-    column_exclude_list = ['history', 'inpayment',]
-    form_excluded_columns = ['history', 'inpayment']
-    column_descriptions = dict(
-        firstName='Name of the corresponding person'
-    )
-
-    base_path = app.config['IMAGE_FOLDER']
-    form_overrides = dict(imageName=FileUploadField)
-    form_args = {
-        'imageName': {
-            'base_path': base_path
-        }
-    }
-    column_labels = dict(firstName='First Name',
-                         lastName='Last Name',
-                         imageName='User Image')
-
-    def is_accessible(self):
-        return loginflask.current_user.is_authenticated
 
 
-class MyItemModelView(ModelView):
-    can_export = True
-    export_types = ['csv']
-    form_excluded_columns = 'items'
-
-    base_path = app.config['ICON_FOLDER']
-    form_overrides = dict(icon=FileUploadField)
-    form_args = {
-        'icon': {
-            'base_path': base_path
-        }
-    }
-
-    def is_accessible(self):
-        return loginflask.current_user.is_authenticated
 
 
-class MyAdminModelView(ModelView):
-    can_export = False
-    # can_delete = False
-    column_exclude_list = ['password', ]
 
-    form_excluded_columns = 'password'
-
-    def is_accessible(self):
-        return loginflask.current_user.is_authenticated
-
-    # On the form for creating or editing a User, don't display a field corresponding to the model's password field.
-    # There are two reasons for this. First, we want to encrypt the password before storing in the database. Second,
-    # we want to use a password field (with the input masked) rather than a regular text field.
-
-    def scaffold_form(self):
-        # Start with the standard form as provided by Flask-Admin. We've already told Flask-Admin to exclude the
-        # password field from this form.
-        form_class = super(MyAdminModelView, self).scaffold_form()
-
-        # Add a password field, naming it "password2" and labeling it "New Password".
-        form_class.password2 = fields.PasswordField('New Password')
-
-        return form_class
-
-    # This callback executes when the User saves changes to a newly-created or edited User -- before the changes are
-    # committed to the database.
-    def on_model_change(self, changed_form, model, is_created):
-
-        # If the password field isn't blank...
-        if len(model.password2):
-            # ... then encrypt the new password prior to storing it in the database. If the password field is blank,
-            # the existing password in the database will be retained.
-            model.password = model.password2
-            # model.password = utils.encrypt_password(model.password2)
-
-    def delete_model(self, model):
-        if loginflask.current_user.id == model.id:
-            flash('You cannot delete your own account.')
-            return False
-        else:
-            return super(MyAdminModelView, self).delete_model(model)
-
-
-class MySettingsModelView(ModelView):
-    can_create = False
-    can_edit = False
-    can_delete = False
-    can_export = False
-    column_editable_list = ['value']
-
-    column_labels = dict(key='Name', value='Value')
-
-    def is_accessible(self):
-        return loginflask.current_user.is_authenticated
-
-
-class MyAdminIndexView(AdminIndexView):
-
-    @expose('/')
-    def index(self):
-        if not loginflask.current_user.is_authenticated:
-            return redirect(url_for('.login_view'))
-        return super(MyAdminIndexView, self).index()
-        # return redirect(url_for('bill.index'))
-
-    @expose('/login/', methods=('GET', 'POST'))
-    def login_view(self):
-        # handle User login
-        login_form = LoginForm(request.form)
-        if helpers.validate_form_on_submit(login_form):
-            user = login_form.get_user()
-            loginflask.login_user(user)
-
-        if loginflask.current_user.is_authenticated:
-            return redirect(url_for('.index'))
-        self._template_args['form'] = login_form
-        #        self._template_args['link'] = link
-        return super(MyAdminIndexView, self).index()
-
-    @expose('/logout/')
-    def logout_view(self):
-        loginflask.logout_user()
-        return redirect(url_for('.index'))
-
-class SnackBarIndexView(BaseView):
-    @expose('/')
-    def index(self):
-        return redirect(url_for('initial'))
 
 init_login()
 
-
-admin = Admin(app, name='SnackBar Admin Page', index_view=MyAdminIndexView(), base_template='my_master.html')
-admin.add_view(AnalyticsView(name='Bill', endpoint='bill'))
-admin.add_view(MyPaymentModelView(Inpayment, db.session, 'Inpayment'))
-admin.add_view(MyUserModelView(User, db.session, 'User'))
-admin.add_view(MyItemModelView(Item, db.session, 'Items'))
-admin.add_view(MyHistoryModelView(History, db.session, 'History'))
-admin.add_view(MyAdminModelView(Coffeeadmin, db.session, 'Admins'))
-admin.add_view(MySettingsModelView(Settings, db.session, 'Settings'))
-admin.add_view(SnackBarIndexView(name='Back to Snack Bar', endpoint='back'))
-
-#admin.add_link(MenuLink(name='Snack Bar', url=url_for('initial')))
 
 current_sorting = ""
 
@@ -728,7 +320,7 @@ current_sorting = ""
 @app.route('/')
 def initial():
     global current_sorting
-    initusers = get_users_with_leaders(true)
+    initusers = get_users_with_leaders(True)
 
     if current_sorting == "az":
         users = sorted(initusers, key=lambda k: k['firstName'])
@@ -745,8 +337,6 @@ def initial():
         users = sorted(initusers, key=lambda k: k['firstName'])
 
     return render_template('index.html', users=users, current_sorting=current_sorting)
-
-
 
 
 @app.route('/sort/<sorting>')
@@ -1218,16 +808,15 @@ def build_sample_db():
 
 
 def set_default_settings():
-    with open('defaultSettings.csv') as csvfile:
+  with open('defaultSettings.csv') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             key = '{}'.format(row['key'])
             db_entry = db.session.query(Settings).filter_by(key=key).first()
             if db_entry is None:
-                newsettingitem = Settings(key='{}'.format(row['key']), value='{}'.format(row['value']))
-                db.session.add(newsettingitem)
-
-    db.session.commit()
+              newsettingitem = Settings(key='{}'.format(row['key']), value='{}'.format(row['value']))
+              db.session.add(newsettingitem)
+  db.session.commit()
 
 
 # noinspection PyBroadException,PyPep8
@@ -1250,8 +839,8 @@ if __name__ == "__main__":
     schedule.every().monday.at("10:30").do(send_reminder_to_all)
     schedule_thread = threading.Thread(target=run_schedule).start()
 
-    if not os.path.isfile(databaseName):
-        build_sample_db()
+    if database_exist() is False:
+      build_sample_db()
 
     set_default_settings()
     # app.run()
