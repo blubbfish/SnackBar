@@ -6,8 +6,6 @@ from flask import Flask
 
 from flask_sqlalchemy import SQLAlchemy
 
-import os
-
 databaseName = 'CoffeeDB.db'
 url = 'sqlite:///' + databaseName
 engine = create_engine(url, connect_args={'check_same_thread': False}, poolclass=SingletonThreadPool)
@@ -25,10 +23,5 @@ app.config['DEBUG'] = False
 app.config['SESSION_COOKIE_PATH'] = '/'
 
 db = SQLAlchemy(app)
-
-def database_exist():
-  if not os.path.isfile("Snackbar/"+databaseName):
-    return False
-  return True
 
 import Snackbar.Models
