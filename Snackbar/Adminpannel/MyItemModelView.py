@@ -1,5 +1,6 @@
 from flask_admin.contrib.sqla import ModelView
 from Snackbar import app
+import flask_login as loginflask
 from flask_admin.form.upload import FileUploadField
 
 class MyItemModelView(ModelView):

@@ -1,7 +1,8 @@
 import csv
 from Snackbar import db, databaseName
-from Snackbar.Models import Settings, User, Item, Inpayment, Coffeeadmin
+from Snackbar.Models import Settings, User, Item, Inpayment, Coffeeadmin, History
 import os
+from sqlalchemy.sql import func
 
 
 def set_default_settings():
@@ -50,3 +51,21 @@ def database_exist():
   if not os.path.isfile("Snackbar/"+databaseName):
     return False
   return True
+
+
+def getcurrbill(userid):
+  curr_bill_new = db.session.query(func.sum(History.price)).filter(History.userid == userid).scalar()
+  if curr_bill_new is None:
+    curr_bill_new = 0
+  user_start = db.session.query(User.startmoney).filter(User.userid == userid).scalar()
+  if user_start is None:
+    user_start = 0
+  curr_bill_new =  curr_bill_new + user_start
+  return curr_bill_new
+
+
+def get_payment(userid):
+  total_payment_new = db.session.query(func.sum(Inpayment.amount)).filter(Inpayment.userid == userid).scalar()
+  if total_payment_new is None:
+    total_payment_new = 0
+  return total_payment_new

@@ -1,4 +1,5 @@
 from flask_admin.contrib.sqla import ModelView
+import flask_login as loginflask
 
 class MySettingsModelView(ModelView):
   can_create = False

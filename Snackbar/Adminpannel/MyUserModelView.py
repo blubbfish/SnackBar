@@ -1,4 +1,5 @@
 from flask_admin.contrib.sqla import ModelView
+import flask_login as loginflask
 from Snackbar import app
 from flask_admin.form.upload import FileUploadField
 

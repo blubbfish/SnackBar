@@ -77,32 +77,10 @@
 ##            raise validators.ValidationError('Duplicate username')
 
 
-##def init_login():
-##    login_manager = loginflask.LoginManager()
-##    login_manager.init_app(app)
-
-##    # Create User loader function
-##    @login_manager.user_loader
-##    def load_user(user_id):
-##        return db.session.query(Coffeeadmin).get(user_id)
 
 
-##def getcurrbill(userid):
-##    curr_bill_new = db.session.query(func.sum(History.price)). \
-##        filter(History.userid == userid).scalar()
-##    if curr_bill_new is None:
-##        curr_bill_new = 0
-##    user_start = db.session.query(User.startmoney).filter(User.userid == userid).scalar()
-##    if user_start is None:
-##        user_start = 0
-##    curr_bill_new =  curr_bill_new + user_start
-##    # bill = History.query.filter(History.userid == userid).filter(History.paid == False)
-##    # currbill = 0
 
-##    # for entry in bill:
-##    #     currbill += entry.price
 
-##    return curr_bill_new
 
 
 ##def get_users():
@@ -217,22 +195,10 @@
 ##    return n_unpaid
 
 
-##def get_payment(userid):
-##    total_payment_new = db.session.query(func.sum(Inpayment.amount)). \
-##        filter(Inpayment.userid == userid).scalar()
-##    if total_payment_new is None:
-##        total_payment_new = 0
-
-##    return total_payment_new
 
 
-##def rest_bill(userid):
-##    curr_bill = getcurrbill(userid)
-##    total_payment = get_payment(userid)
 
-##    rest_amount = -curr_bill + total_payment
 
-##    return rest_amount
 
 
 ##def make_xls_bill(filename, fullpath):
@@ -752,10 +718,9 @@
 
 
 
-
-from Snackbar.Helper import setup_schedule, database_exist, set_default_settings, build_sample_db, stop_schedule
-from Snackbar.Admin import setup_admin
 from Snackbar import app
+from Snackbar.Helper import setup_schedule, database_exist, set_default_settings, build_sample_db, stop_schedule
+from Snackbar.Adminpannel import setup_admin
 from flaskrun import flaskrun, load_options
 
 options = load_options()
@@ -765,7 +730,7 @@ if __name__ == "__main__":
   if database_exist() is False:
     build_sample_db()
   set_default_settings()
-  setup_admin()
+  setup_admin(app)
 
   # app.run()
   # app.run(host='0.0.0.0', port=5000, debug=False)
