@@ -29,6 +29,7 @@
 
 ##from Snackbar.Models import *
 ##from Snackbar.Admin import admin
+
 ##if not os.path.exists(app.config['IMAGE_FOLDER']):
 ##    os.makedirs(app.config['IMAGE_FOLDER'])
 
@@ -36,12 +37,7 @@
 # Set up the command-line options
 
 
-##def settings_for(key):
-##    db_entry = db.session.query(Settings).filter_by(key=key).first()
-##    if db_entry is None:
-##        return ''
-##    else:
-##        return db_entry.value
+
 
 
 ##@app.template_filter("itemstrikes")
@@ -170,18 +166,7 @@
 ##            'lowerbound': lowerbound}
 
 
-##def get_unpaid(userid, itemid):
-##    n_unpaid = db.session.query(History). \
-##        filter(History.userid == userid). \
-##        filter(History.itemid == itemid). \
-##        filter(extract('month', History.date) == datetime.now().month). \
-##        filter(extract('year', History.date) == datetime.now().year) \
-##        .count()
 
-##    if n_unpaid is None:
-##        n_unpaid = 0
-
-##    return n_unpaid
 
 
 ##def get_total(userid, itemid):
@@ -201,34 +186,7 @@
 
 
 
-##def make_xls_bill(filename, fullpath):
-##    # filename = 'CoffeeBill_{}_{}.xls'.format(datetime.now().date().isoformat(),
-##    #                                        datetime.now().time().strftime('%H-%M-%S'))
 
-##    # fullpath = os.path.join(current_app.root_path, app.config['STATIC_FOLDER'])
-##    header = list()
-##    header.append('name')
-##    for entry in Item.query:
-##        header.append('{}'.format(entry.name))
-##    header.append('bill')
-
-##    excel_data = tablib.Dataset()
-##    excel_data.headers = header
-
-##    for instance in User.query.filter(User.hidden.is_(False)):
-##        firstline = list()
-##        firstline.append(u'{} {}'.format(instance.firstName, instance.lastName))
-
-##        for record in Item.query:
-##            firstline.append('{}'.format(get_unpaid(instance.userid, record.itemid)))
-
-##        firstline.append('{0:.2f}'.format(rest_bill(instance.userid)))
-##        excel_data.append(firstline)
-
-##    with open(os.path.join(fullpath, filename), 'wb') as f:
-##        f.write(excel_data.xls)
-
-##    return
 
 
 ##def button_background(user):
@@ -597,37 +555,7 @@
 ##        mymail.send()
 
 
-##def send_reminder(curuser):
-##    if curuser.email:
-##        curn_bill_float = rest_bill(curuser.userid)
-##        minimum_balance = float(settings_for('minimumBalance'))
-##        if curn_bill_float <= minimum_balance:
-##            currbill = '{0:.2f}'.format(rest_bill(curuser.userid))
-##            # print(instance.firstName)
-##            # print(currbill)
-##            mymail = Bimail('SnackBar Reminder', ['{}'.format(curuser.email)])
-##            mymail.sendername = settings_for('mailSender')
-##            mymail.sender = settings_for('mailSender')
-##            mymail.servername = settings_for('mailServer')
-##            # start html body. Here we add a greeting.
-##            mymail.htmladd(
-##                'Hallo {} {},<br><br>du hast nur noch wenig Geld auf deinem SnackBar Konto ({} €). '
-##                'Zahle bitte ein bisschen Geld ein, damit wir wieder neue Snacks kaufen können!'
-##                '<br><br>Ciao,<br>SnackBar Team [{}]<br><br><br><br>---------<br><br><br><br>'
-##                'Hello {} {},<br><br>your SnackBar balance is very low ({} €). '
-##                'Please top it up with some money!<br><br>Ciao,<br>SnackBar Team [{}]'.format(
-##                    curuser.firstName, curuser.lastName, currbill, settings_for('snackAdmin'), curuser.firstName,
-##                    curuser.lastName, currbill, settings_for('snackAdmin')))
-##            # Further things added to body are separated by a paragraph, so you do not need to
-##            # worry about newlines for new sentences here we add a line of text and an html table
-##            # previously stored in the variable
-##            # add image chart title
-##            # attach another file
-##            # mymail.htmladd('Ciao,<br>SnackBar Team [Clemens Putschli (C5-315)]')
-##            # mymail.addattach([os.path.join(fullpath, filename)])
-##            # send!
-##            # print(mymail.htmlbody)
-##            mymail.send()
+
 
 
 ##def send_email(curuser, curitem):

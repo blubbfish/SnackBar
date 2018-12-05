@@ -1,4 +1,6 @@
 from Snackbar import db
+from datetime import datetime
+
 
 class Inpayment (db.Model):
   paymentid = db.Column(db.Integer, primary_key=True, autoincrement=True)

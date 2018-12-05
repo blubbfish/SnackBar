@@ -69,3 +69,11 @@ def get_payment(userid):
   if total_payment_new is None:
     total_payment_new = 0
   return total_payment_new
+
+
+def settings_for(key):
+    db_entry = db.session.query(Settings).filter_by(key=key).first()
+    if db_entry is None:
+        return ''
+    else:
+        return db_entry.value

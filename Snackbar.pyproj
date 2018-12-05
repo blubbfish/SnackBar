@@ -29,10 +29,61 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="SnackBar.py" />
-    <Compile Include="sendEmail.py" />
+    <Compile Include="Snackbar\Helper\Bimail.py" />
     <Compile Include="flaskrun.py" />
     <Compile Include="collectTotalBill.py" />
     <Compile Include="analysisUtils.py" />
+    <Compile Include="Snackbar\Adminpannel\AnalyticsView.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Snackbar\Adminpannel\LoginForm.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Snackbar\Adminpannel\MyAdminIndexView.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Snackbar\Adminpannel\MyAdminModelView.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Snackbar\Adminpannel\MyHistoryModelView.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Snackbar\Adminpannel\MyItemModelView.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Snackbar\Adminpannel\MyPaymentModelView.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Snackbar\Adminpannel\MySettingsModelView.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Snackbar\Adminpannel\MyUserModelView.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Snackbar\Adminpannel\SnackBarIndexView.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Snackbar\Adminpannel\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Snackbar\Helper\Billing.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Snackbar\Helper\Database.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Snackbar\Helper\Mailing.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Snackbar\Helper\Reminder.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Snackbar\Helper\Autoreminder.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Snackbar\Helper\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Snackbar\Models\Coffeeadmin.py">
       <SubType>Code</SubType>
     </Compile>
@@ -60,6 +111,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Snackbar\" />
+    <Folder Include="Snackbar\Adminpannel\" />
+    <Folder Include="Snackbar\Helper\" />
     <Folder Include="Snackbar\Models\" />
     <Folder Include="Snackbar\static\" />
     <Folder Include="Snackbar\static\bootstrap\" />
