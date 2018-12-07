@@ -1,4 +1,5 @@
 from flask_admin import expose, BaseView
+from flask import redirect, url_for
 
 class SnackBarIndexView(BaseView):
     @expose('/')

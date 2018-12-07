@@ -1,8 +1,12 @@
 from flask_admin.contrib.sqla import ModelView
-import flask_login as loginflask
-from datetime import datetime
-from Snackbar.Models.Cashdesk import Cashdesk
 from sqlalchemy import func
+from datetime import datetime
+import flask_login as loginflask
+from Snackbar.Models.Cashdesk import Cashdesk
+from Snackbar.Models.Inpayment import Inpayment
+from Snackbar.Models.User import User
+from Snackbar.Helper.Database import settings_for
+from Snackbar.Helper.Billing import rest_bill
 
 
 class MyCashdeskModelView(ModelView):
@@ -35,14 +39,37 @@ class MyCashdeskModelView(ModelView):
     page_sum = sum([payment.price for payment in _query])
     if page_sum is None:
       page_sum = 0
-    return '{0:.2f}'.format(page_sum)
+    return page_sum
 
   def total_sum(self):
     # this should take into account any filters/search inplace
     total_sum = self.session.query(func.sum(Cashdesk.price)).scalar()
     if total_sum is None:
       total_sum = 0
-    return '{0:.2f}'.format(total_sum)
+    return total_sum
+
+  def total_sum_inpayment(self):
+    # this should take into account any filters/search inplace
+    total_sum = self.session.query(func.sum(Inpayment.amount)).scalar()
+    if total_sum is None:
+      total_sum = 0
+    return total_sum
+
+  def cash_sum(self):
+    money_start = settings_for('startmoney')
+    if money_start is '':
+      money_start = 0
+    if money_start is not 0:
+      money_start = float(money_start)
+    money_start = money_start + self.total_sum()
+    money_start = money_start + self.total_sum_inpayment()
+    return money_start
+
+  def total_list(self):
+    sum = 0
+    for instance in User.query.filter(User.hidden.is_(False)):
+      sum = sum + rest_bill(instance.userid)
+    return sum
 
   def render(self, template, **kwargs):
     # we are only interested in the list page
@@ -50,9 +77,10 @@ class MyCashdeskModelView(ModelView):
       # append a summary_data dictionary into kwargs
       _current_page = kwargs['page']
       kwargs['summary_data'] = [
-        {'title': 'Page Total', 'price': self.page_sum(_current_page)},
-        {'title': 'Grand Total', 'price': self.total_sum()},
-        #{'title': 'Money in cash point', 'amount': self.cash_sum()},
+        {'title': 'Page Cash Desk', 'price': '{0:.2f}'.format(self.page_sum(_current_page))},
+        {'title': 'Total Cash Desk', 'price': '{0:.2f}'.format(self.total_sum())},
+        {'title': 'Money in cash point', 'price': '{0:.2f}'.format(self.cash_sum())},
+        {'title': 'Money on List', 'price': '{0:.2f}'.format(self.total_list())}
       ]
       kwargs['summary_title'] = [{'title': ''}, {'title': 'Amount'}, ]
     return super(MyCashdeskModelView, self).render(template, **kwargs)

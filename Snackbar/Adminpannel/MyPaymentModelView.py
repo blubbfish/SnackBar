@@ -1,8 +1,12 @@
 from flask_admin.contrib.sqla import ModelView
-from Snackbar.Models.Inpayment import Inpayment
-from Snackbar.Helper.Database import settings_for
 from sqlalchemy import func
+from datetime import datetime
 import flask_login as loginflask
+from Snackbar.Models.Inpayment import Inpayment
+from Snackbar.Models.Cashdesk import Cashdesk
+from Snackbar.Models.User import User
+from Snackbar.Helper.Database import settings_for
+from Snackbar.Helper.Billing import rest_bill
 
 
 class MyPaymentModelView(ModelView):
@@ -10,10 +14,10 @@ class MyPaymentModelView(ModelView):
   can_delete = True
   can_edit = True
   can_export = True
-  form_excluded_columns = 'date'
   export_types = ['csv']
   column_default_sort = ('date', True)
   column_filters = ('user', 'amount', 'date')
+  form_args = dict(date=dict(default=datetime.now()), amount=dict(default=0))
   list_template = 'admin/custom_list.html'
   
   def date_format(self, context, model, name):
@@ -31,14 +35,21 @@ class MyPaymentModelView(ModelView):
     page_sum = sum([payment.amount for payment in _query])
     if page_sum is None:
       page_sum = 0
-    return '{0:.2f}'.format(page_sum)
+    return page_sum
 
   def total_sum(self):
     # this should take into account any filters/search inplace
     total_sum = self.session.query(func.sum(Inpayment.amount)).scalar()
     if total_sum is None:
       total_sum = 0
-    return '{0:.2f}'.format(total_sum)
+    return total_sum
+
+  def total_sum_cashdesk(self):
+    # this should take into account any filters/search inplace
+    total_sum = self.session.query(func.sum(Cashdesk.price)).scalar()
+    if total_sum is None:
+      total_sum = 0
+    return total_sum
 
   def cash_sum(self):
     money_start = settings_for('startmoney')
@@ -46,7 +57,15 @@ class MyPaymentModelView(ModelView):
       money_start = 0
     if money_start is not 0:
       money_start = float(money_start)
-    return '{0:.2f}'.format(money_start)
+    money_start = money_start + self.total_sum()
+    money_start = money_start + self.total_sum_cashdesk()
+    return money_start
+
+  def total_list(self):
+    sum = 0
+    for instance in User.query.filter(User.hidden.is_(False)):
+      sum = sum + rest_bill(instance.userid)
+    return sum
 
   def render(self, template, **kwargs):
     # we are only interested in the list page
@@ -54,9 +73,10 @@ class MyPaymentModelView(ModelView):
       # append a summary_data dictionary into kwargs
       _current_page = kwargs['page']
       kwargs['summary_data'] = [
-        {'title': 'Page Total', 'amount': self.page_sum(_current_page)},
-        {'title': 'Grand Total', 'amount': self.total_sum()},
-        {'title': 'Money in cash point', 'amount': self.cash_sum()},
+        {'title': 'Page Total', 'amount': '{0:.2f}'.format(self.page_sum(_current_page))},
+        {'title': 'Grand Total', 'amount': '{0:.2f}'.format(self.total_sum())},
+        {'title': 'Money in cash point', 'amount': '{0:.2f}'.format(self.cash_sum())},
+        {'title': 'Money on List', 'amount': '{0:.2f}'.format(self.total_list())}
       ]
       kwargs['summary_title'] = [{'title': ''}, {'title': 'Amount'}, ]
     return super(MyPaymentModelView, self).render(template, **kwargs)

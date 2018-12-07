@@ -1,8 +1,16 @@
 import csv
 from Snackbar import db, databaseName
-from Snackbar.Models import Settings, User, Item, Inpayment, Coffeeadmin, History
+from Snackbar.Models.Settings import Settings
+from Snackbar.Models.User import User
+from Snackbar.Models.Item import Item
+from Snackbar.Models.Inpayment import Inpayment
+from Snackbar.Models.Coffeeadmin import Coffeeadmin
+from Snackbar.Models.History import History
+from Snackbar.Helper.Appearance import button_background, button_font_color
+from Snackbar.Helper.Billing import get_unpaid
 import os
-from sqlalchemy.sql import func
+from sqlalchemy.sql import func, and_, extract
+from datetime import datetime
 
 
 def set_default_settings():
@@ -53,27 +61,49 @@ def database_exist():
   return True
 
 
-def getcurrbill(userid):
-  curr_bill_new = db.session.query(func.sum(History.price)).filter(History.userid == userid).scalar()
-  if curr_bill_new is None:
-    curr_bill_new = 0
-  user_start = db.session.query(User.startmoney).filter(User.userid == userid).scalar()
-  if user_start is None:
-    user_start = 0
-  curr_bill_new =  curr_bill_new + user_start
-  return curr_bill_new
-
-
-def get_payment(userid):
-  total_payment_new = db.session.query(func.sum(Inpayment.amount)).filter(Inpayment.userid == userid).scalar()
-  if total_payment_new is None:
-    total_payment_new = 0
-  return total_payment_new
-
-
 def settings_for(key):
-    db_entry = db.session.query(Settings).filter_by(key=key).first()
-    if db_entry is None:
-        return ''
-    else:
-        return db_entry.value
+  db_entry = db.session.query(Settings).filter_by(key=key).first()
+  if db_entry is None:
+    return ''
+  else:
+    return db_entry.value
+
+
+def get_leader_data(userid, skip):
+  leader_info = list()
+  if not skip:
+    all_items = Item.query.filter(Item.icon is not None, Item.icon != '', Item.icon != ' ')
+    i = 0
+    for aItem in all_items:
+      leader_id = int(get_leader(aItem.itemid))
+      if leader_id == userid:
+        item_id = int(aItem.itemid)
+        icon_file = str(aItem.icon)
+        position = (-7 + (i * 34))
+        leader_info.append({"item_id": item_id, "icon": icon_file, "position": position})
+        i = i + 1
+  return leader_info
+
+
+def get_leader(itemid):
+  tmp_query = db.session.query(User.userid, func.count(History.price))
+  tmp_query = tmp_query.outerjoin(History, and_(User.userid == History.userid, History.itemid == itemid, extract('month', History.date) == datetime.now().month, extract('year', History.date) == datetime.now().year))
+  tmp_query = tmp_query.group_by(User.userid)
+  tmp_query = tmp_query.order_by(func.count(History.price).desc()).first()
+  if tmp_query[1] != 0:
+    return tmp_query[0]
+  else:
+    return -1
+
+
+def get_users_with_leaders(with_leader):
+  initusers = list()
+  all_items = Item.query.filter(Item.icon is not None, Item.icon != '', Item.icon != ' ')
+  all_items_id = [int(instance.itemid) for instance in all_items]
+  if len(all_items_id) > 0:
+    itemid = all_items_id[0]
+  else:
+    itemid = ''
+  for instance in User.query.filter(User.hidden.is_(False)):
+    initusers.append({'firstName': u'{}'.format(instance.firstName), 'lastName': u'{}'.format(instance.lastName), 'imageName': '{}'.format(instance.imageName), 'id': '{}'.format(instance.userid), 'bgcolor': '{}'.format(button_background(instance.firstName + ' ' + instance.lastName)), 'fontcolor': '{}'.format(button_font_color(instance.firstName + ' ' + instance.lastName)), 'coffeeMonth': get_unpaid(instance.userid, itemid), 'leader': get_leader_data(instance.userid, not with_leader), 'email': '{}'.format(instance.email)})
+  return initusers

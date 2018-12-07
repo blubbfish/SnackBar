@@ -1,12 +1,12 @@
-from Snackbar.Helper.Database import getcurrbill, get_payment
 from Snackbar.Models.Item import Item
 from Snackbar.Models.User import User
 from Snackbar.Models.History import History
+from Snackbar.Models.Inpayment import Inpayment
 from tablib import Dataset
 from Snackbar import db
 from os import path
 from datetime import datetime
-from sqlalchemy import extract
+from sqlalchemy import extract, func
 
 
 def rest_bill(userid):
@@ -21,6 +21,31 @@ def get_unpaid(userid, itemid):
   if n_unpaid is None:
     n_unpaid = 0
   return n_unpaid
+
+
+def get_total(userid, itemid):
+  n_unpaid = db.session.query(History).filter(History.userid == userid).filter(History.itemid == itemid).count()
+  if n_unpaid is None:
+    n_unpaid = 0
+  return n_unpaid
+
+
+def getcurrbill(userid):
+  curr_bill_new = db.session.query(func.sum(History.price)).filter(History.userid == userid).scalar()
+  if curr_bill_new is None:
+    curr_bill_new = 0
+  user_start = db.session.query(User.startmoney).filter(User.userid == userid).scalar()
+  if user_start is None:
+    user_start = 0
+  curr_bill_new =  curr_bill_new + user_start
+  return curr_bill_new
+
+
+def get_payment(userid):
+  total_payment_new = db.session.query(func.sum(Inpayment.amount)).filter(Inpayment.userid == userid).scalar()
+  if total_payment_new is None:
+    total_payment_new = 0
+  return total_payment_new
 
 
 def make_xls_bill(filename, fullpath):
