@@ -1,5 +1,7 @@
 from wtforms import form, fields, validators
 from Snackbar import db
+from Snackbar.Models.Coffeeadmin import Coffeeadmin
+
 
 class LoginForm(form.Form):
     login = fields.StringField(validators=[validators.required()])

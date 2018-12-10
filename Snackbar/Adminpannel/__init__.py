@@ -18,7 +18,7 @@ from Snackbar.Adminpannel.MyAdminModelView import MyAdminModelView
 from Snackbar.Models.Coffeeadmin import Coffeeadmin
 from Snackbar.Adminpannel.MySettingsModelView import MySettingsModelView
 from Snackbar.Models.Settings import Settings
-from SnackBarIndexView import SnackBarIndexView
+from Snackbar.Adminpannel.SnackBarIndexView import SnackBarIndexView
 
 def setup_admin(app):
   init_login(app)

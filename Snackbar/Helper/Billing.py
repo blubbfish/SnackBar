@@ -10,10 +10,18 @@ from sqlalchemy import extract, func
 
 
 def rest_bill(userid):
+  startmoney = get_startmoney(userid)
   curr_bill = getcurrbill(userid)
   total_payment = get_payment(userid)
-  rest_amount = -curr_bill + total_payment
+  rest_amount = -curr_bill + total_payment + startmoney
   return rest_amount
+
+
+def get_startmoney(userid):
+  user_start = db.session.query(User.startmoney).filter(User.userid == userid).scalar()
+  if user_start is None:
+    user_start = 0
+  return user_start
 
 
 def get_unpaid(userid, itemid):
@@ -34,10 +42,6 @@ def getcurrbill(userid):
   curr_bill_new = db.session.query(func.sum(History.price)).filter(History.userid == userid).scalar()
   if curr_bill_new is None:
     curr_bill_new = 0
-  user_start = db.session.query(User.startmoney).filter(User.userid == userid).scalar()
-  if user_start is None:
-    user_start = 0
-  curr_bill_new =  curr_bill_new + user_start
   return curr_bill_new
 
 

@@ -1,5 +1,5 @@
 from Snackbar import app, db
-from flask import render_template
+from flask import render_template, request, redirect, url_for
 from jinja2 import Markup
 from Snackbar.Models.User import User
 from Snackbar.Models.Item import Item
@@ -7,7 +7,10 @@ from Snackbar.Models.History import History
 from Snackbar.Helper.Ranking import get_rank
 from Snackbar.Helper.Billing import get_unpaid, get_total, rest_bill
 from Snackbar.Helper.Database import settings_for
-from Snackbar.Helper.Appearance import reltime
+from Snackbar.Helper.Appearance import reltime, allowed_file
+from Snackbar.Helper.Mailing import send_email_new_user, send_email
+from os import path
+from werkzeug.utils import secure_filename
 
 
 class Userpage():
@@ -68,7 +71,7 @@ class Userpage():
             file = request.files['image']
             if file.filename != '' and allowed_file(file.filename):
               filename = secure_filename(file.filename)
-              full_path = os.path.join(app.config['IMAGE_FOLDER'], filename)
+              full_path = path.join("Snackbar/"+app.config['IMAGE_FOLDER'], filename)
               file.save(full_path)
           new_user = User(firstname=first_name, lastname=last_name, email=email, imagename=filename)
           db.session.add(new_user)
@@ -119,7 +122,7 @@ class Userpage():
         file = request.files['image']
         if file.filename != '' and allowed_file(file.filename):
           filename = secure_filename(file.filename)
-          full_path = os.path.join(app.config['IMAGE_FOLDER'], filename)
+          full_path = path.join("Snackbar/"+app.config['IMAGE_FOLDER'], filename)
           file.save(full_path)
           userid = request.form["userid"]
           current_user = User.query.get(userid)

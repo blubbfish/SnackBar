@@ -154,3 +154,8 @@ def reltime(date, compare_to=None, at='@'):
     # not last week, but not last month either
     datestr = '{month} {day} {at} {time} ({days_ago} days ago)'
   return datestr.format(time=_time, weekday=date.strftime('%A'), day=ordinal(date.day), days=diff.days, days_ago=days_ago, month=date.strftime('%B'), years_ago=years_ago, months_ago=months_ago, weeks_ago=weeks_ago, year=date.year, at=at)
+
+
+def allowed_file(filename):
+  allowed_extensions = {'png', 'jpg', 'jpeg', 'gif'}
+  return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions

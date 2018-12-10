@@ -23,5 +23,3 @@ app.config['DEBUG'] = False
 app.config['SESSION_COOKIE_PATH'] = '/'
 
 db = SQLAlchemy(app)
-
-import Snackbar.Models

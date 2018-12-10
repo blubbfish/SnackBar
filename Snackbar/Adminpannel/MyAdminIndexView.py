@@ -1,7 +1,7 @@
 from flask_admin import AdminIndexView, helpers, expose
 import flask_login as loginflask
 from LoginForm import LoginForm
-from flask import redirect
+from flask import redirect, url_for, request
 
 class MyAdminIndexView(AdminIndexView):
   @expose('/')

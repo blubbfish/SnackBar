@@ -16,7 +16,7 @@ class Bimail:
     def __init__(self, subject, recipients):
         self.subject = subject
         self.recipients = recipients
-        self.htmlbody = ''
+        self.htmlbody = u''
         self.sender = ''
         self.senderpass = ''
         self.sendername = ''
@@ -33,7 +33,7 @@ class Bimail:
         if self.attachments:
             self.attach(msg)
             # add html body after attachments
-        msg.attach(MIMEText(self.htmlbody, 'html'))
+        msg.attach(MIMEText(self.htmlbody.encode('utf8', errors='ignore'), 'html', 'utf-8'))
         if msg.get('Date', None) is None:
             msg['Date'] = email.utils.formatdate()
         # send
@@ -42,11 +42,11 @@ class Bimail:
         # s.login(self.sender, self.senderpass)
         s.sendmail(self.sender, self.recipients, msg.as_string())
         # test
-        # print(msg)
+        #print(msg)
         s.quit()
 
     def htmladd(self, html):
-        self.htmlbody = self.htmlbody + '<p></p>' + html
+        self.htmlbody = self.htmlbody + '<p>'+html+'</p>'
 
     def attach(self, msg):
         for f in self.attachments:
