@@ -1,5 +1,5 @@
 from flask_admin import Admin
-from SnackBar import db
+from Snackbar import db
 import flask_login as loginflask
 
 from Snackbar.Adminpannel.MyAdminIndexView import MyAdminIndexView
