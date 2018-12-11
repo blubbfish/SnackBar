@@ -29,10 +29,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="SnackBar.py" />
+    <Compile Include="Snackbar\Adminpannel\MyCashdeskModelView.py" />
+    <Compile Include="Snackbar\Frontpage\Analysispage.py" />
+    <Compile Include="Snackbar\Frontpage\Titlepage.py" />
+    <Compile Include="Snackbar\Frontpage\Userpage.py" />
+    <Compile Include="Snackbar\Frontpage\__init__.py" />
+    <Compile Include="Snackbar\Helper\Analysis.py" />
+    <Compile Include="Snackbar\Helper\Appearance.py" />
     <Compile Include="Snackbar\Helper\Bimail.py" />
-    <Compile Include="flaskrun.py" />
-    <Compile Include="collectTotalBill.py" />
-    <Compile Include="analysisUtils.py" />
     <Compile Include="Snackbar\Adminpannel\AnalyticsView.py">
       <SubType>Code</SubType>
     </Compile>
@@ -75,6 +79,7 @@
     <Compile Include="Snackbar\Helper\Mailing.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Snackbar\Helper\Ranking.py" />
     <Compile Include="Snackbar\Helper\Reminder.py">
       <SubType>Code</SubType>
     </Compile>
@@ -84,6 +89,7 @@
     <Compile Include="Snackbar\Helper\__init__.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Snackbar\Models\Cashdesk.py" />
     <Compile Include="Snackbar\Models\Coffeeadmin.py">
       <SubType>Code</SubType>
     </Compile>
@@ -112,6 +118,7 @@
   <ItemGroup>
     <Folder Include="Snackbar\" />
     <Folder Include="Snackbar\Adminpannel\" />
+    <Folder Include="Snackbar\Frontpage\" />
     <Folder Include="Snackbar\Helper\" />
     <Folder Include="Snackbar\Models\" />
     <Folder Include="Snackbar\static\" />
@@ -130,7 +137,15 @@
     <Folder Include="Snackbar\templates\admin\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="defaultSettings.csv" />
+    <Content Include="install.sh" />
+    <Content Include="README.md" />
     <Content Include="requirements.txt" />
+    <Content Include="snackbar.service" />
+    <Content Include="Snackbar\Frontpage\Analysispage.pyc" />
+    <Content Include="Snackbar\Frontpage\Titlepage.pyc" />
+    <Content Include="Snackbar\Frontpage\Userpage.pyc" />
+    <Content Include="Snackbar\Frontpage\__init__.pyc" />
     <Content Include="Snackbar\static\app_icon.png" />
     <Content Include="Snackbar\static\idleTimer.js" />
     <Content Include="Snackbar\static\stay_standalone.js" />
@@ -163,6 +178,7 @@
     <Content Include="Snackbar\templates\admin\index.html" />
     <Content Include="Snackbar\templates\admin\test.html" />
     <Content Include="db_update.sh" />
+    <Content Include="userList.csv" />
   </ItemGroup>
   <ItemGroup>
     <Interpreter Include="env\">
