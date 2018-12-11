@@ -1,3 +1,5 @@
+# coding=utf-8
+
 from flask_admin.contrib.sqla import ModelView
 from Snackbar import app
 import flask_login as loginflask
@@ -15,6 +17,9 @@ class MyItemModelView(ModelView):
       'base_path': base_path
     }
   }
+
+  column_default_sort = 'name'
+  column_formatters = dict(price=lambda view, context, model, name: u'{0:.2f} €'.format(model.price))
 
   def is_accessible(self):
     return loginflask.current_user.is_authenticated

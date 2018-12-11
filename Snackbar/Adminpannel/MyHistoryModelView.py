@@ -1,6 +1,9 @@
+# coding=utf-8
+
 from flask_admin.contrib.sqla import ModelView
 import flask_login as loginflask
 from datetime import datetime
+
 
 class MyHistoryModelView(ModelView):
   can_create = True
@@ -22,7 +25,7 @@ class MyHistoryModelView(ModelView):
     else:
       return ""
 
-  column_formatters = dict(date=date_format)
+  column_formatters = dict(date=date_format, price=lambda view, context, model, name: u'{0:.2f} €'.format(model.price))
 
   def is_accessible(self):
     return loginflask.current_user.is_authenticated

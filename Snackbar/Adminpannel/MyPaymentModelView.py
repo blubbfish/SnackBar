@@ -1,3 +1,5 @@
+# coding=utf-8
+
 from flask_admin.contrib.sqla import ModelView
 from sqlalchemy import func
 from datetime import datetime
@@ -24,7 +26,7 @@ class MyPaymentModelView(ModelView):
     field = getattr(model, name)
     return field.strftime('%Y-%m-%d %H:%M')
 
-  column_formatters = dict(date=date_format)
+  column_formatters = dict(date=date_format, amount=lambda view, context, model, name: u'{0:.2f} €'.format(model.amount))
 
   def is_accessible(self):
     return loginflask.current_user.is_authenticated
@@ -73,10 +75,10 @@ class MyPaymentModelView(ModelView):
       # append a summary_data dictionary into kwargs
       _current_page = kwargs['page']
       kwargs['summary_data'] = [
-        {'title': 'Page Total', 'amount': '{0:.2f}'.format(self.page_sum(_current_page))},
-        {'title': 'Grand Total', 'amount': '{0:.2f}'.format(self.total_sum())},
-        {'title': 'Money in cash point', 'amount': '{0:.2f}'.format(self.cash_sum())},
-        {'title': 'Money on List', 'amount': '{0:.2f}'.format(self.total_list())}
+        {'title': 'Page Total', 'amount': u'{0:.2f} €'.format(self.page_sum(_current_page))},
+        {'title': 'Grand Total', 'amount': u'{0:.2f} €'.format(self.total_sum())},
+        {'title': 'Money in cash point', 'amount': u'{0:.2f} €'.format(self.cash_sum())},
+        {'title': 'Money on List', 'amount': u'{0:.2f} €'.format(self.total_list())}
       ]
       kwargs['summary_title'] = [{'title': ''}, {'title': 'Amount'}, ]
     return super(MyPaymentModelView, self).render(template, **kwargs)

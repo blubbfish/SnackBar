@@ -1,3 +1,5 @@
+# coding=utf-8
+
 from flask_admin.contrib.sqla import ModelView
 from sqlalchemy import func
 from datetime import datetime
@@ -31,7 +33,7 @@ class MyCashdeskModelView(ModelView):
     else:
       return ""
 
-  column_formatters = dict(date=date_format)
+  column_formatters = dict(date=date_format, price=lambda view, context, model, name: u'{0:.2f} €'.format(model.price))
 
   def page_sum(self, current_page):
     # this should take into account any filters/search inplace
@@ -77,10 +79,10 @@ class MyCashdeskModelView(ModelView):
       # append a summary_data dictionary into kwargs
       _current_page = kwargs['page']
       kwargs['summary_data'] = [
-        {'title': 'Page Cash Desk', 'price': '{0:.2f}'.format(self.page_sum(_current_page))},
-        {'title': 'Total Cash Desk', 'price': '{0:.2f}'.format(self.total_sum())},
-        {'title': 'Money in cash point', 'price': '{0:.2f}'.format(self.cash_sum())},
-        {'title': 'Money on List', 'price': '{0:.2f}'.format(self.total_list())}
+        {'title': 'Page Cash Desk', 'price': u'{0:.2f} €'.format(self.page_sum(_current_page))},
+        {'title': 'Total Cash Desk', 'price': u'{0:.2f} €'.format(self.total_sum())},
+        {'title': 'Money in cash point', 'price': u'{0:.2f} €'.format(self.cash_sum())},
+        {'title': 'Money on List', 'price': u'{0:.2f} €'.format(self.total_list())}
       ]
       kwargs['summary_title'] = [{'title': ''}, {'title': 'Amount'}, ]
     return super(MyCashdeskModelView, self).render(template, **kwargs)

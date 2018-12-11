@@ -1,3 +1,5 @@
+# coding=utf-8
+
 from Snackbar.Models.Item import Item
 from Snackbar.Models.User import User
 from Snackbar.Models.History import History
@@ -56,7 +58,7 @@ def make_xls_bill(filename, fullpath):
   header = list()
   header.append('name')
   for entry in Item.query:
-    header.append('{}'.format(entry.name))
+    header.append(u'{}'.format(entry.name))
   header.append('bill')
   excel_data = Dataset()
   excel_data.headers = header
@@ -64,8 +66,8 @@ def make_xls_bill(filename, fullpath):
     firstline = list()
     firstline.append(u'{} {}'.format(instance.firstName, instance.lastName))
     for record in Item.query:
-      firstline.append('{}'.format(get_unpaid(instance.userid, record.itemid)))
-    firstline.append('{0:.2f}'.format(rest_bill(instance.userid)))
+      firstline.append(u'{}'.format(get_unpaid(instance.userid, record.itemid)))
+    firstline.append(u'{0:.2f} €'.format(rest_bill(instance.userid)))
     excel_data.append(firstline)
   with open(path.join(fullpath, filename), 'wb') as f:
     f.write(excel_data.xls)

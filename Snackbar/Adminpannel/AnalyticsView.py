@@ -1,3 +1,5 @@
+# coding=utf-8
+
 from flask_admin import BaseView, expose
 import flask_login as loginflask
 from Snackbar.Models.User import User
@@ -14,7 +16,7 @@ class AnalyticsView(BaseView):
   def index(self):
     initusers = list()
     for instance in User.query.filter(User.hidden.is_(False)):
-        initusers.append({'name': u'{} {}'.format(instance.firstName, instance.lastName),'userid': '{}'.format(instance.userid),'bill': rest_bill(instance.userid)})
+        initusers.append({'name': u'{} {}'.format(instance.firstName, instance.lastName),'userid': '{}'.format(instance.userid),'bill': u'{0:.2f} €'.format(rest_bill(instance.userid))})
     users = sorted(initusers, key=lambda k: k['name'])
     return self.render('admin/test.html', users=users)
 

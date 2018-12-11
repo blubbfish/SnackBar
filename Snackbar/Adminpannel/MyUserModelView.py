@@ -1,3 +1,5 @@
+# coding=utf-8
+
 from flask_admin.contrib.sqla import ModelView
 import flask_login as loginflask
 from Snackbar import app
@@ -20,6 +22,9 @@ class MyUserModelView(ModelView):
     }
   }
   column_labels = dict(firstName='First Name',lastName='Last Name',imageName='User Image')
+  
+  column_default_sort = 'firstName'
+  column_formatters = dict(startmoney=lambda view, context, model, name: u'{0:.2f} €'.format(model.startmoney))
 
   def is_accessible(self):
     return loginflask.current_user.is_authenticated
