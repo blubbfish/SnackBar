@@ -1,10 +1,10 @@
 from sqlalchemy.pool import SingletonThreadPool
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import engine, create_engine
-
 from flask import Flask
-
 from flask_sqlalchemy import SQLAlchemy
+
+version = "0.8.0"
 
 databaseName = 'CoffeeDB.db'
 url = 'sqlite:///' + databaseName

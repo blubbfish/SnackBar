@@ -1,0 +1,9 @@
+Package: snackbar
+Version: x.x-x
+Section: base
+Priority: optional
+Architecture: any
+Depends: python-psycopg2 (>= 2.6.2), python-flask (>= 0.12.1), python-flask-sqlalchemy (>= 2.1), python-tablib (>= 0.9.11), python-numpy (>= 1:1.12.1), python-schedule (>= 0.3.2), python-requests (>= 2.12.4), python-werkzeug (>= 0.11.15), python-jinja2 (>= 2.8), python-click (>= 6.6), python-itsdangerous (>= 0.24), python-sqlalchemy (>= 1.0.15)
+Maintainer: BlubbFish <dev@blubbfish.net>
+Description: SnackBar
+  This is a web app for a digital coffee list hosted on an iPad.
