@@ -1,4 +1,4 @@
-import csv
+from csv import DictReader
 from Snackbar import db, databaseName
 from Snackbar.Models.Settings import Settings
 from Snackbar.Models.User import User
@@ -8,14 +8,15 @@ from Snackbar.Models.Coffeeadmin import Coffeeadmin
 from Snackbar.Models.History import History
 from Snackbar.Helper.Appearance import button_background, button_font_color
 from Snackbar.Helper.Billing import get_unpaid
-import os
+from os import path
+from shutil import move
 from sqlalchemy.sql import func, and_, extract
 from datetime import datetime
 
 
 def set_default_settings():
   with open('defaultSettings.csv') as csvfile:
-    reader = csv.DictReader(csvfile)
+    reader = DictReader(csvfile)
     for row in reader:
       key = '{}'.format(row['key'])
       db_entry = db.session.query(Settings).filter_by(key=key).first()
@@ -29,7 +30,7 @@ def build_sample_db():
   db.drop_all()
   db.create_all()
   with open('userList.csv') as csvfile:
-    reader = csv.DictReader(csvfile)
+    reader = DictReader(csvfile)
     for row in reader:
       newuser = User(firstname='{}'.format(row['FirstName']), lastname='{}'.format(row['LastName']), imagename='{}'.format(row['ImageName']), email='{}'.format(row['email']))
       db.session.add(newuser)
@@ -55,10 +56,26 @@ def build_sample_db():
   return
 
 
-def database_exist():
-  if not os.path.isfile("Snackbar/"+databaseName):
-    return False
-  return True
+def database_migrate_from_05_to_07():
+  move(databaseName,"Snackbar/"+databaseName)
+  db.engine.execute("ALTER TABLE `user` ADD `startmoney` FLOAT NOT NULL DEFAULT 0.0")
+  db.engine.execute("CREATE TABLE `cashdesk` (`cashid` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, `price` FLOAT NOT NULL DEFAULT 0.0, `date` DATETIME NOT NULL, `item` TEXT NOT NULL);")
+  return database_migrate_from_07_to_08()
+
+
+def database_migrate_from_07_to_08():
+  open("VERSION","w").write("0.8")
+  return
+
+
+def database_exist_or_upgrade():
+  if path.isfile(databaseName):
+    return database_migrate_from_05_to_07()
+  if path.isfile("Snackbar/"+databaseName) and not path.isfile("VERSION"):
+    return database_migrate_from_07_to_08()
+  if path.isfile("VERSION") and open("VERSION","r").read() is "0.8":
+    return
+  return build_sample_db()
 
 
 def settings_for(key):

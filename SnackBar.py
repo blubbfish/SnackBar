@@ -2,7 +2,7 @@
 
 from Snackbar import app
 from Snackbar.Helper.Autoreminder import setup_schedule, stop_schedule
-from Snackbar.Helper.Database import database_exist, set_default_settings, build_sample_db
+from Snackbar.Helper.Database import database_exist_or_upgrade, set_default_settings
 from Snackbar.Adminpannel import setup_admin
 from Snackbar.Frontpage import setup_frontpage
 from optparse import OptionParser
@@ -45,14 +45,13 @@ def flaskrun(app, options=None):
 
 
 if __name__ == "__main__":
-  setup_schedule()
-  if database_exist() is False:
-    build_sample_db()
+  database_exist_or_upgrade()
   set_default_settings()
   setup_admin(app)
   setup_frontpage()
 
   # app.run()
   # app.run(host='0.0.0.0', port=5000, debug=False)
+  setup_schedule()
   flaskrun(app, options=load_options())
   stop_schedule()

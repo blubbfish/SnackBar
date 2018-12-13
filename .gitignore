@@ -20,3 +20,4 @@ sqlite
 CoffeeDB.db
 static/images/
 /.vs
+/VERSION
