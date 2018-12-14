@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if [[ $(systemctl is-active snackbar || true) == "active" ]]
+then
+    touch /tmp/snackbar_service_runner
+    service snackbar stop
+fi

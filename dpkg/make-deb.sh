@@ -20,6 +20,9 @@ mkdir -p $SYSTEMD
 cp control $DEBIAN
 sed -i s/Version:\ x\.x-x/"Version: $VMAJOR.$VMINOR-$VBUILD"/ $DEBIAN/control
 sed -i s/Architecture:\ any/"Architecture: $ARCHT"/ $DEBIAN/control
+cp preinst $DEBIAN
+cp postinst $DEBIAN
+cp prerm $DEBIAN
 chmod 755 $DEBIAN -R
 
 cp snackbar.service $SYSTEMD

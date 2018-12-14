@@ -1,0 +1,11 @@
+#!/bin/bash
+
+systemctl enable snackbar
+systemctl daemon-reload
+
+pip install --system -q -r /usr/local/bin/snackbar/requirements.txt
+
+if [ -f /tmp/snackbar_service_runner ]; then
+    service snackbar start
+    rm /tmp/snackbar_service_runner
+fi

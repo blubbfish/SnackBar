@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [ ! `id -u snackbar 2>/dev/null || echo -1` -ge 0 ]; then 
+    useradd -M snackbar
+    usermod -L snackbar
+fi
+
+if [ `grep "^snackbar:" /etc/group || echo -1` = "-1" ]; then
+    groupadd snackbar
+    usermod -G snackbar,adm snackbar
+fi

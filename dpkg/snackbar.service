@@ -4,12 +4,12 @@ After=network-online.target
 
 [Service]
 PermissionsStartOnly=true
-User=schell
-Group=sudo
+User=snackbar
+Group=snackbar
 WorkingDirectory=/usr/local/bin/SnackBar
 ExecStartPre=/bin/rm -f /var/log/snackbar.log
 ExecStartPre=/bin/touch /var/log/snackbar.log
-ExecStartPre=/bin/chown schell:sudo /var/log/snackbar.log
+ExecStartPre=/bin/chown snackbar:snackbar /var/log/snackbar.log
 ExecStartPre=/bin/chmod 644 /var/log/snackbar.log
 ExecStart=/usr/bin/python SnackBar.py > /var/log/snackbar.log
 KillMode=control-group

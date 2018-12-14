@@ -116,6 +116,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="dpkg\" />
     <Folder Include="Snackbar\" />
     <Folder Include="Snackbar\Adminpannel\" />
     <Folder Include="Snackbar\Frontpage\" />
@@ -138,10 +139,13 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="defaultSettings.csv" />
-    <Content Include="install.sh" />
+    <Content Include="dpkg\control" />
+    <Content Include="dpkg\create-builds.bat" />
+    <Content Include="dpkg\install.sh" />
+    <Content Include="dpkg\make-deb.sh" />
     <Content Include="README.md" />
     <Content Include="requirements.txt" />
-    <Content Include="snackbar.service" />
+    <Content Include="dpkg\snackbar.service" />
     <Content Include="Snackbar\Frontpage\Analysispage.pyc" />
     <Content Include="Snackbar\Frontpage\Titlepage.pyc" />
     <Content Include="Snackbar\Frontpage\Userpage.pyc" />
@@ -177,7 +181,6 @@
     <Content Include="Snackbar\templates\admin\custom_list.html" />
     <Content Include="Snackbar\templates\admin\index.html" />
     <Content Include="Snackbar\templates\admin\test.html" />
-    <Content Include="db_update.sh" />
     <Content Include="userList.csv" />
   </ItemGroup>
   <ItemGroup>

@@ -53,6 +53,7 @@ def build_sample_db():
   newadmin = Coffeeadmin(name='admin', password='admin')
   db.session.add(newadmin)
   db.session.commit()
+  set_version_nr("0.8.0")
   return
 
 
@@ -63,19 +64,37 @@ def database_migrate_from_05_to_07():
   return database_migrate_from_07_to_08()
 
 
-def database_migrate_from_07_to_08():
-  open("VERSION","w").write("0.8")
+def database_migrate_from_07_to_080():
+  set_version_nr("0.8.0")
   return
 
 
 def database_exist_or_upgrade():
   if path.isfile(databaseName):
     return database_migrate_from_05_to_07()
-  if path.isfile("Snackbar/"+databaseName) and not path.isfile("VERSION"):
-    return database_migrate_from_07_to_08()
-  if path.isfile("VERSION") and open("VERSION","r").read() is "0.8":
+  if path.isfile("Snackbar/"+databaseName) and get_version_nr() is None:
+    return database_migrate_from_07_to_080()
+  if get_version_nr() == "0.8.0":
     return
   return build_sample_db()
+
+
+def get_version_nr():
+  try:
+    res = db.engine.execute("SELECT `versionnr` FROM `database`")
+    for row in res:
+      return row[0]
+  except:
+    return None
+
+
+def set_version_nr(nr):
+  if get_version_nr() is None:
+    db.engine.execute("CREATE TABLE `database` (`versionnr` VARCHAR (20));")
+  else:
+    db.engine.execute("DELETE FROM `database`;");
+    db.engine.execute("VACUUM;")
+  db.engine.execute("INSERT INTO `database` (`versionnr`) VALUES ('"+nr+"')")
 
 
 def settings_for(key):
