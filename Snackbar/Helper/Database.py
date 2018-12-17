@@ -1,5 +1,5 @@
 from csv import DictReader
-from Snackbar import db, databaseName
+from Snackbar import db, databaseName, version
 from Snackbar.Models.Settings import Settings
 from Snackbar.Models.User import User
 from Snackbar.Models.Item import Item
@@ -8,7 +8,7 @@ from Snackbar.Models.Coffeeadmin import Coffeeadmin
 from Snackbar.Models.History import History
 from Snackbar.Helper.Appearance import button_background, button_font_color
 from Snackbar.Helper.Billing import get_unpaid
-from os import path
+from os import path, access, W_OK
 from shutil import move
 from sqlalchemy.sql import func, and_, extract
 from datetime import datetime
@@ -53,26 +53,35 @@ def build_sample_db():
   newadmin = Coffeeadmin(name='admin', password='admin')
   db.session.add(newadmin)
   db.session.commit()
-  set_version_nr("0.8.0")
+  set_version_nr(version)
   return
 
 
 def database_migrate_from_05_to_07():
-  move(databaseName,"Snackbar/"+databaseName)
+  print "Update from 0.5 to 0.7"
+  move("CoffeeDB.db", "Snackbar/CoffeeDB.db")
   db.engine.execute("ALTER TABLE `user` ADD `startmoney` FLOAT NOT NULL DEFAULT 0.0")
   db.engine.execute("CREATE TABLE `cashdesk` (`cashid` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, `price` FLOAT NOT NULL DEFAULT 0.0, `date` DATETIME NOT NULL, `item` TEXT NOT NULL);")
   return database_migrate_from_07_to_08()
 
 
 def database_migrate_from_07_to_080():
+  print "Update from 0.7 to 0.8.0"
+  move("Snackbar/CoffeeDB.db", "/var/lib/snackbar/CoffeeDB.db")
   set_version_nr("0.8.0")
   return
 
 
 def database_exist_or_upgrade():
-  if path.isfile(databaseName):
+  if not path.isdir("/var/lib/snackbar/"):
+    print "Path /var/lib/snackbar not exist! Please create it. Exit program!"
+    quit()
+  if not access("/var/lib/snackbar/", W_OK):
+    print "Path /var/lib/snackbar is not writable. Please run chmod or chown. Exit program!"
+    quit()
+  if path.isfile("CoffeeDB.db"):
     return database_migrate_from_05_to_07()
-  if path.isfile("Snackbar/"+databaseName) and get_version_nr() is None:
+  if path.isfile("Snackbar/CoffeeDB.db"):
     return database_migrate_from_07_to_080()
   if get_version_nr() == "0.8.0":
     return

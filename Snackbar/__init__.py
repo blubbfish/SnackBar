@@ -7,7 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 version = "0.8.0"
 
 databaseName = 'CoffeeDB.db'
-url = 'sqlite:///' + databaseName
+url = 'sqlite:////var/lib/snackbar/' + databaseName
 engine = create_engine(url, connect_args={'check_same_thread': False}, poolclass=SingletonThreadPool)
 Session = sessionmaker(bind=engine)
 session = Session()
