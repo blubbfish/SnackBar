@@ -1,7 +1,7 @@
 from Snackbar import app
 from Snackbar.Helper.Database import get_users_with_leaders
 from Snackbar.Helper.Appearance import monster_image, image_from_folder
-from flask import render_template, request
+from flask import render_template, request, redirect, url_for
 
 current_sorting = ""
 
